@@ -15,9 +15,20 @@ def agendamento_detail(request, id):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def agendamento_list(request):
-    qs = Agendamento.objects.all()
-    serializer = AgendamentoSerializer(qs, many=True)
+    if request.method == 'GET':
+        qs = Agendamento.objects.all()
+        serializer = AgendamentoSerializer(qs, many=True)
 
-    return Response(serializer.data)
+        return Response(serializer.data)
+
+    if request.method == 'POST':
+        serializer = AgendamentoSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
