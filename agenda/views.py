@@ -7,12 +7,32 @@ from .models import Agendamento
 from agenda.serializers import AgendamentoSerializer
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PATCH', 'DELETE'])
 def agendamento_detail(request, id):
     obj = get_object_or_404(Agendamento, id=id)
-    serializer = AgendamentoSerializer(obj)
 
-    return Response(serializer.data)
+    if request.method == 'GET':
+        serializer = AgendamentoSerializer(obj)
+
+        return Response(serializer.data)
+    elif request.method == 'PATCH':
+        data = {
+            "nome_cliente": request.data.get('nome_cliente')
+        }
+
+        serializer = AgendamentoSerializer(
+            obj, data=data, partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(data=serializer.data)
+        else:
+            return Response(serializer.errors)
+    elif request.method == 'DELETE':
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['GET', 'POST'])
