@@ -2,20 +2,28 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 
 from .models import Agendamento
 from agenda.serializers import AgendamentoSerializer
 
 
-@api_view(['GET', 'PATCH', 'DELETE'])
-def agendamento_detail(request, id):
-    obj = get_object_or_404(Agendamento, id=id)
-
-    if request.method == 'GET':
+class AgendamentoDetail(APIView):
+    def get(self, request, id):
+        """
+        Get a schedule by ID
+        """
+        obj = get_object_or_404(Agendamento, id=id)
         serializer = AgendamentoSerializer(obj)
 
         return Response(serializer.data)
-    elif request.method == 'PATCH':
+
+    def patch(self, request, id):
+        """
+        Update a schedule
+        """
+        obj = get_object_or_404(Agendamento, id=id)
+
         data = {
             "nome_cliente": request.data.get('nome_cliente')
         }
@@ -30,20 +38,22 @@ def agendamento_detail(request, id):
             return Response(data=serializer.data)
         else:
             return Response(serializer.errors)
-    elif request.method == 'DELETE':
+
+    def delete(self, request, id):
+        obj = get_object_or_404(Agendamento, id=id)
         obj.delete()
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET', 'POST'])
-def agendamento_list(request):
-    if request.method == 'GET':
-        qs = Agendamento.objects.all()
-        serializer = AgendamentoSerializer(qs, many=True)
+class AgendamentoList(APIView):
+    def get(self, request):
+        agendamentos = Agendamento.objects.all()
+        serializer = AgendamentoSerializer(agendamentos, many=True)
 
         return Response(serializer.data)
 
-    if request.method == 'POST':
+    def post(self, request):
         serializer = AgendamentoSerializer(data=request.data)
 
         if serializer.is_valid():
