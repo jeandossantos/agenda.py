@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import mixins
 from rest_framework import generics
-
+from rest_framework import permissions
 from .models import Agendamento
 from agenda.serializers import AgendamentoSerializer
 
@@ -40,7 +40,7 @@ class AgendamentoDetail(
 class AgendamentoList(
         generics.ListCreateAPIView
 ):
-
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     serializer_class = AgendamentoSerializer
 
     def get_queryset(self):
