@@ -38,15 +38,13 @@ class AgendamentoDetail(
 
 
 class AgendamentoList(
-        mixins.ListModelMixin,
-        mixins.CreateModelMixin,
-        generics.GenericAPIView
+        generics.ListCreateAPIView
 ):
-    queryset = Agendamento.objects.all()
+
     serializer_class = AgendamentoSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    def get_queryset(self):
+        username = self.request.query_params.get('username', None)
+        queryset = Agendamento.objects.filter(prestador__username=username)
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+        return queryset

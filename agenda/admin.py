@@ -8,7 +8,8 @@ class AgendamentoAdmin(admin.ModelAdmin):
         'data_horario',
         'nome_cliente',
         'email_cliente',
-        'telefone_cliente'
+        'telefone_cliente',
+        'prestador'
     ]
 
 
