@@ -80,5 +80,6 @@ class TestCreateAgendamento(APITestCase):
                 'data_horario': ['This field is required.'],
                 'nome_cliente': ['This field is required.'],
                 'email_cliente': ['This field is required.'],
-                'telefone_cliente': ['This field is required.']
+                'telefone_cliente': ['This field is required.'],
+                'prestador': ''
             })

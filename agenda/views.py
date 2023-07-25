@@ -9,6 +9,42 @@ from rest_framework import permissions
 from .models import Agendamento
 from agenda.serializers import AgendamentoSerializer
 
+from datetime import datetime
+
+
+class IsOwnerOrCreateOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return True
+
+        username = request.query_params.get('username', None)
+
+        if request.user.username == username:
+            return True
+
+        return False
+
+
+class IsPrestador(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if obj.prestador == request.user:
+            return True
+
+        return False
+
+
+class AgendamentoList(
+        generics.ListCreateAPIView
+):
+    permission_classes = [IsOwnerOrCreateOnly]
+    serializer_class = AgendamentoSerializer
+
+    def get_queryset(self):
+        username = self.request.query_params.get('username', None)
+        queryset = Agendamento.objects.filter(prestador__username=username)
+
+        return queryset
+
 
 class AgendamentoDetail(
     mixins.RetrieveModelMixin,
@@ -16,6 +52,7 @@ class AgendamentoDetail(
     mixins.UpdateModelMixin,
     generics.GenericAPIView
 ):
+    permission_classes = [IsPrestador]
     queryset = Agendamento.objects.all()
     serializer_class = AgendamentoSerializer
     lookup_field = "id"
@@ -37,14 +74,15 @@ class AgendamentoDetail(
         return self.destroy(request, *args, **kwargs)
 
 
-class AgendamentoList(
-        generics.ListCreateAPIView
-):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    serializer_class = AgendamentoSerializer
+@api_view(['GET'])
+def get_horarios(request):
+    data = request.query_params.get('data')
 
-    def get_queryset(self):
-        username = self.request.query_params.get('username', None)
-        queryset = Agendamento.objects.filter(prestador__username=username)
+    if not data:
+        data = datetime.now().date()
+    else:
+        data = datetime.fromisoformat(data).date()
 
-        return queryset
+    # horarios_disponiveis = sorted(list(get_horarios_disponiveis(data)))
+
+    # return Response(horarios_disponiveis)
