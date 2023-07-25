@@ -26,3 +26,11 @@ class AgendamentoSerializer(serializers.ModelSerializer):
                 'Agendamento não pode ser feito no passado!')
 
         return value
+
+
+class PrestadorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'agendamentos']
+
+    agendamentos = AgendamentoSerializer(many=True, read_only=True)

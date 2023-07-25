@@ -7,8 +7,8 @@ from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import permissions
 from .models import Agendamento
-from agenda.serializers import AgendamentoSerializer
-
+from django.contrib.auth.models import User
+from agenda.serializers import AgendamentoSerializer, PrestadorSerializer
 from datetime import datetime
 
 
@@ -33,9 +33,7 @@ class IsPrestador(permissions.BasePermission):
         return False
 
 
-class AgendamentoList(
-        generics.ListCreateAPIView
-):
+class AgendamentoList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrCreateOnly]
     serializer_class = AgendamentoSerializer
 
@@ -72,6 +70,12 @@ class AgendamentoDetail(
     def delete(self, request, *args, **kwargs):
         """Delete a schedule"""
         return self.destroy(request, *args, **kwargs)
+
+
+class PrestadorList(generics.ListAPIView):
+    permission_classes = [permissions.IsAdminUser]
+    serializer_class = PrestadorSerializer
+    queryset = User.objects.all()
 
 
 @api_view(['GET'])
