@@ -10,6 +10,7 @@ from .models import Agendamento
 from django.contrib.auth.models import User
 from agenda.serializers import AgendamentoSerializer, PrestadorSerializer
 from datetime import datetime
+from agenda.utils import get_horarios_disponiveis
 
 
 class IsOwnerOrCreateOnly(permissions.BasePermission):
@@ -87,6 +88,6 @@ def get_horarios(request):
     else:
         data = datetime.fromisoformat(data).date()
 
-    # horarios_disponiveis = sorted(list(get_horarios_disponiveis(data)))
+    horarios_disponiveis = sorted(list(get_horarios_disponiveis(data)))
 
-    # return Response(horarios_disponiveis)
+    return Response(horarios_disponiveis)
