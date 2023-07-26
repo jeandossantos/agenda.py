@@ -65,7 +65,6 @@ class TestCreateAgendamento(APITestCase):
         data_horario = datetime(current_date.year + 1,
                                 2, 10, 13, 30, tzinfo=timezone.utc).isoformat()
 
-        print(data_horario)
         request_data = {
             "data_horario": data_horario,
             "nome_cliente": "Diego Fernandes",
@@ -117,4 +116,11 @@ class classTestGetHorarios(APITestCase):
         self.assertEqual(response.data, [])
 
     def return_available_days_if_is_not_a_holiday(self):
-        pass
+        response = self.client.get(
+            '/api/horarios/?data=2028-12-20'
+        )
+
+        self.assertEqual(response.data[0], datetime(
+            2028, 12, 20, 9, tzinfo=timezone.utc))
+        self.assertEqual(
+            response.data[-1], datetime(2028, 12, 20, 18, tzinfo=timezone.utc))
