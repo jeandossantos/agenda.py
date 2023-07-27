@@ -1,14 +1,10 @@
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import HTTP_HEADER_ENCODING
+from unittest import mock
+from rest_framework.test import APITestCase
 import json
-from datetime import datetime, timedelta, timezone
-import base64
+from datetime import datetime, timezone
 
 from agenda.models import Agendamento
 from django.contrib.auth.models import User
-from requests.auth import HTTPBasicAuth
-import requests
-from requests.auth import HTTPBasicAuth
 
 
 class TestListagemAgendamento(APITestCase):
@@ -75,7 +71,6 @@ class TestCreateAgendamento(APITestCase):
 
         response = self.client.post('/api/agendamentos/', request_data)
 
-        print(response.json())
         self.assertEqual(response.status_code, 201)
 
         obj_from_db = Agendamento.objects.get()
@@ -91,31 +86,38 @@ class TestCreateAgendamento(APITestCase):
             request_data
         )
 
-    def test_not_create_agendamento(self):
-        response = self.client.post('/api/agendamentos/', {})
+    def test_not_create_agendamento_with_passed_date(self):
+        data_horario = datetime(2020, 2, 10, 13, 30, tzinfo=timezone.utc)
 
-        response_data = json.loads(response.content)
+        request_data = {
+            "data_horario": data_horario.isoformat(),
+            "nome_cliente": "Diego Fernandes",
+            "email_cliente": "diego3g@hotmail.com",
+            "telefone_cliente": "70809040",
+            "prestador": self.username
+        }
 
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response_data, {
-                'data_horario': ['This field is required.'],
-                'nome_cliente': ['This field is required.'],
-                'email_cliente': ['This field is required.'],
-                'telefone_cliente': ['This field is required.'],
-                'prestador': ['This field is required.']
-            })
+        response = self.client.post('/api/agendamentos/', request_data)
+
+        assert response.status_code == 400
+        assert response.json() == {
+            "data_horario": [
+                "Agendamento não pode ser feito no passado!"
+            ]
+        }
 
 
-class classTestGetHorarios(APITestCase):
-    def return_empty_list_if_date_is_holiday(self):
+class TestGetHorarios(APITestCase):
+    @mock.patch('agenda.libs.brasil_api.is_feriado', return_value=True)
+    def test_return_empty_list_if_date_is_holiday(self, _):
         response = self.client.get(
-            '/api/horarios/?data=2023-12-25'
+            '/api/horarios/?data=2023-12-20'
         )
 
         self.assertEqual(response.data, [])
 
-    def return_available_days_if_is_not_a_holiday(self):
+    @mock.patch('agenda.libs.brasil_api.is_feriado', return_value=False)
+    def test_return_available_days_if_is_not_a_holiday(self, _):
         response = self.client.get(
             '/api/horarios/?data=2028-12-20'
         )
