@@ -1,14 +1,18 @@
 from datetime import date
 import requests as request
 from django.conf import settings
+import logging
 
 
 def is_feriado(data: date) -> bool:
     """Verifica se o dia informado é um feriado."""
+    logging.info(f"fazendo requisição para brasil_api com data {data}")
 
     if settings.TESTING == True:
+        logging.info(f"requisição não feita: TESTING=TRUE {data}")
         if data.day == 25 and data.month == 12:
-            return True
+            logging.error('Algum erro ocorreu ao acessar Brasil API.')
+            return False
 
         return False
 
