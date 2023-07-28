@@ -3,5 +3,5 @@
     "editor.defaultFormatter": "ms-python.autopep8"
   },
   "python.formatting.provider": "none",
-  "cSpell.words": ["disponiveis", "horario", "horarios"]
+  "cSpell.words": ["disponiveis", "horario", "horarios", "relatorio"]
 }
