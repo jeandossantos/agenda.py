@@ -26,8 +26,10 @@ def gera_relatorio_prestador():
                 agendamento["telefone_cliente"]
             ])
 
-    email = EmailMessage('Relatório de prestadores', 'Em anexo o relatório.',
-                         'agenda-app@gmail.com', ['jeanddg@hotmail.com'])
+    email = EmailMessage(
+        'Relatório de prestadores', 'Em anexo o relatório.',
+        'agenda-app@gmail.com', ['jeanddg@hotmail.com']
+    )
 
     email.attach('relatório.csv', output.getvalue(), 'text/csv')
     email.send()
