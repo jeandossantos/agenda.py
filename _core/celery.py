@@ -4,9 +4,9 @@ import os
 # precisa dizer qual settings deve ser usando para encontrar os app instalados
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', '_core.settings.development')
 
-app = Celery('_core', broker='redis://localhost:6379/0',
-             backend='redis://localhost:6379/0')
+app = Celery('_core')
 
+app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 

@@ -4,6 +4,7 @@ from io import StringIO
 from agenda.serializers import PrestadorSerializer
 from django.contrib.auth.models import User
 from _core.celery import app
+from django.core.mail import EmailMessage
 
 
 @app.task
@@ -25,4 +26,10 @@ def gera_relatorio_prestador():
                 agendamento["telefone_cliente"]
             ])
 
-    print(output.getvalue())
+    email = EmailMessage('Relatório de prestadores', 'Em anexo o relatório.',
+                         'agenda-app@gmail.com', ['jeanddg@hotmail.com'])
+
+    email.attach('relatório.csv', output.getvalue(), 'text/csv')
+    email.send()
+
+    # print(output.getvalue())
