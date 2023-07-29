@@ -3,19 +3,19 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.decorators import permission_classes
 
+from datetime import datetime, date
+import csv
 
 from .models import Agendamento
 from django.contrib.auth.models import User
 from agenda.serializers import AgendamentoSerializer, PrestadorSerializer
-from datetime import datetime, date
 from agenda.utils import get_horarios_disponiveis
-import csv
+from agenda.tasks import gera_relatorio_prestador
 
 
 class IsOwnerOrCreateOnly(permissions.BasePermission):
@@ -82,32 +82,25 @@ class AgendamentoDetail(
 @permission_classes([permissions.IsAdminUser])
 def relatorio_prestador(request):
     formato = request.query_params.get('formato')
-    users = User.objects.all()
-    serializer = PrestadorSerializer(users, many=True)
     current_date = date.today()
 
     if formato == 'csv':
-        response = HttpResponse(
-            content_type="text/csv",
-            headers={
-                "Content-Disposition": f'attachment; filename="relatorio_{current_date}.csv"'},
-        )
+        # response = HttpResponse(
+        #     content_type="text/csv",
+        #     headers={
+        #         "Content-Disposition": f'attachment; filename="relatorio_{current_date}.csv"'},
+        # )
 
-        writer = csv.writer(response)
-        writer.writerow(["prestador", "horário", "Nome", "Email", "Telefone"])
+        result = gera_relatorio_prestador.delay()
 
-        for user in serializer.data:
-            for agendamento in user['agendamentos']:
-                writer.writerow([
-                    agendamento["prestador"],
-                    agendamento["data_horario"],
-                    agendamento["nome_cliente"],
-                    agendamento["email_cliente"],
-                    agendamento["telefone_cliente"]
-                ])
+        return Response({
+            "task_id": result.task_id
+        })
 
-        return response
     else:
+        users = User.objects.all()
+        serializer = PrestadorSerializer(users, many=True)
+
         return Response(serializer.data)
 
 
