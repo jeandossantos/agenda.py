@@ -9,7 +9,6 @@ from rest_framework import permissions
 from rest_framework.decorators import permission_classes
 
 from datetime import datetime, date
-import csv
 
 from .models import Agendamento
 from django.contrib.auth.models import User
